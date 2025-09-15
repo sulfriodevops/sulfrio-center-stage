@@ -4,13 +4,13 @@ import { cn } from "@/lib/utils"
 
 interface ModeSelectorProps {
   value: string
-  onChange: (value: string) => void
+  onChange: value: string => void
 }
 
 const modes = [
   { value: "residencial", label: "Residencial", description: "até 140%" },
   { value: "corporativo", label: "Corporativo", description: "até 110%" },
-  { value: "maximo", label: "Capacidade Máxima", description: "100%" },
+  { value: "maximo", label: "Capacidade Máxima"},
 ]
 
 export function ModeSelector({ value, onChange }: ModeSelectorProps) {
