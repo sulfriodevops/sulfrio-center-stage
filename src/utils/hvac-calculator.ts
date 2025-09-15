@@ -1,4 +1,6 @@
 // HVAC Calculator Logic - Ported from original HTML
+import { supabase } from "@/integrations/supabase/client"
+
 export interface EvaporatorModel {
   nome: string
   modelo: string
@@ -40,7 +42,22 @@ function criarModeloDaikin(nome: string, capNominal: number, capMax: number, lis
   }
 }
 
-// Daikin Models
+// Conversão genérica de registros do DB para EvaporatorModel
+export function criarModeloFromDB(dado: any): EvaporatorModel {
+  const nome: string = dado.nome
+  const modelo: string = dado.modelo || (typeof nome === 'string' ? nome.split(' ')[1] : '')
+  const capNominal: number = dado.cap_nominal
+  const capMax: number = dado.cap_max
+  const combinacoesArr: string[] = Array.isArray(dado.combinacoes) ? dado.combinacoes : []
+  const combinacoes = new Set(
+    combinacoesArr
+      .map((c) => c.split(',').map((s) => parseInt(s.trim(), 10)))
+      .map((nums) => norm(nums))
+  )
+  return { nome, modelo, capNominal, capMax, combinacoes }
+}
+
+// Daikin Models (fallback estático)
 const DAIKIN_18_BI = criarModeloDaikin('Daikin 18 Bi', 18, 24, [
   [9, 9],
   [9, 12],
@@ -113,7 +130,7 @@ const DAIKIN_MODELOS = [
   DAIKIN_18_BI, DAIKIN_18_TRI, DAIKIN_24, DAIKIN_28, DAIKIN_34, DAIKIN_38
 ]
 
-// LG Models
+// LG Models (fallback estático)
 const LG_MODELOS_INFO = [
   { nome: 'LG 18', capNominal: 18, capMax: 24, maxEvaps: 2 },
   { nome: 'LG 21', capNominal: 21, capMax: 30, maxEvaps: 3 },
@@ -150,7 +167,7 @@ const LG_MODELOS: EvaporatorModel[] = LG_MODELOS_INFO.map(info => ({
   combinacoes: gerarCombinacoesLG(info.capMax, info.maxEvaps)
 }))
 
-// Samsung Models
+// Samsung Models (fallback estático)
 const SAMSUNG_18: EvaporatorModel = {
   nome: 'Samsung 18',
   modelo: '18',
@@ -208,11 +225,50 @@ const SAMSUNG_28: EvaporatorModel = {
 // Samsung 34 and 48 combinations would be added here...
 // For now, keeping the essential ones
 
-export const MODELOS: EvaporatorModel[] = [
+// Lista de modelos (inicialmente fallback estático) — será substituída por dados do DB quando carregados
+export let MODELOS: EvaporatorModel[] = [
   SAMSUNG_18, SAMSUNG_24, SAMSUNG_28,
   ...LG_MODELOS,
   ...DAIKIN_MODELOS
 ]
+
+async function carregarMODELOSFromDBInternal(): Promise<void> {
+  const { data, error } = await supabase
+    .from('multi_produtos')
+    .select('*')
+    .eq('tipo', 'MULTI')
+
+  if (error) {
+    console.error('Erro ao carregar multi_produtos:', error)
+    return
+  }
+
+  const lista = (data || []).map(criarModeloFromDB)
+  MODELOS = lista
+}
+
+let modelosIniciados = false
+let subscrito = false
+
+export async function ensureMODELOSFromDB(): Promise<void> {
+  if (!modelosIniciados) {
+    await carregarMODELOSFromDBInternal()
+    modelosIniciados = true
+  }
+  if (!subscrito) {
+    try {
+      supabase
+        .channel('multi_produtos_changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'multi_produtos' }, async () => {
+          await carregarMODELOSFromDBInternal()
+        })
+        .subscribe()
+      subscrito = true
+    } catch (e) {
+      console.warn('Realtime não disponível, mantendo MODELOS por requisição única.', e)
+    }
+  }
+}
 
 function isDaikin(modelo: EvaporatorModel): boolean {
   return modelo.nome.toLowerCase().startsWith('daikin')
@@ -242,7 +298,7 @@ export interface DetailedResult {
 
 export function calcular(entradaOriginal: number[], modo: string, marcaSelecionada: string) {
   const total = soma(entradaOriginal)
-  
+
   let tag7 = ''
   if (entradaOriginal.includes(7)) {
     if (marcaSelecionada === 'daikin') tag7 = ' - 7 tratado como 9'
@@ -263,7 +319,7 @@ export function calcular(entradaOriginal: number[], modo: string, marcaSeleciona
 
   // Generate detailed results for display
   const detailedResults: DetailedResult[] = []
-  
+
   if (marcaSelecionada === "todas") {
     const marcas = [...new Set(MODELOS.map(m => m.nome.split(' ')[0]))]
     marcas.forEach(marca => {
