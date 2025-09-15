@@ -292,11 +292,14 @@ export function VRFCondensadoraCalculator() {
             
             {results && evaporators.length > 0 ? (
               <div className="space-y-3 text-sm">
-                {/* Warning for Daikin with 145% */}
-                {selectedBrand === "daikin" && params.simultaneidade === "residencial" && (
+                {/* Warning for Daikin quando simultaneidade > 130% */}
+                {(() => {
+                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+                  return selectedBrand === 'daikin' && simulRaw > 1.30;
+                })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                     <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                      Atenção: na Daikin o limite é 130%. "Limite Residencial (145%)" só é permitido pela Samsung. Os cálculos abaixo consideram 130%.
+                      Na Daikin o limite máximo é 130%. "Limite Residencial (145%)" só é permitido pela Samsung. Os cálculos abaixo consideram 130%.
                     </p>
                   </div>
                 )}
