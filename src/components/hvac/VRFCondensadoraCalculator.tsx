@@ -179,6 +179,19 @@ export function VRFCondensadoraCalculator() {
                 </Button>
               ))}
             </div>
+            {/* Alerta para 145% inválido em Vertical */}
+            {(() => {
+              const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+              const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+              if (!invalid145Vertical) return null;
+              return (
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                    Limite Residencial (145%) permitido apenas para Condensadoras Horizontais
+                  </p>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Tipo de Condensadora e Modo */}
