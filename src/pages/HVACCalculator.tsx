@@ -7,7 +7,7 @@ import { CalculationResult } from "@/components/hvac/CalculationResult"
 import { DetailedAnalysis } from "@/components/hvac/DetailedAnalysis"
 import { ArrowLeft, Calculator, Snowflake } from "lucide-react"
 import { Link } from "react-router-dom"
-import { parseEntrada, calcular, type DetailedResult } from "@/utils/hvac-calculator"
+import { parseEntrada, calcular, ensureMODELOSFromDB, type DetailedResult } from "@/utils/hvac-calculator"
 
 export default function HVACCalculator() {
   const [evaporators, setEvaporators] = useState("")
