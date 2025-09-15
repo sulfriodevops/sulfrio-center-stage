@@ -292,6 +292,19 @@ export function VRFCondensadoraCalculator() {
             
             {results && evaporators.length > 0 ? (
               <div className="space-y-3 text-sm">
+                {/* Alerta para 145% inválido em Vertical */}
+                {(() => {
+                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+                  const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+                  return invalid145Vertical;
+                })() && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                      Atenção: você selecionou 145% com condensadora Vertical. Essa combinação é inválida.
+                    </p>
+                  </div>
+                )}
+
                 {/* Warning for Daikin quando simultaneidade > 130% */}
                 {(() => {
                   const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
@@ -303,7 +316,7 @@ export function VRFCondensadoraCalculator() {
                     </p>
                   </div>
                 )}
-                
+
                 {results[selectedBrand].condensadoraIdeal && (
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="font-medium">Condensadora ideal: {results[selectedBrand].condensadoraIdeal.nome}{results[selectedBrand].condensadoraIdeal.volt ? ` (${results[selectedBrand].condensadoraIdeal.volt}v)` : ''}</p>
