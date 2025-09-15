@@ -1,60 +1,99 @@
-import { Label } from "@/components/ui/label"
+import { useEffect, useMemo, useState } from "react"
 import { HVACCard } from "@/components/ui/hvac-card"
-import { cn } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { supabase } from "@/integrations/supabase/client"
 
 interface ModeSelectorProps {
   value: string
   onChange: (value: string) => void
 }
 
-const modes = [
-  { value: "residencial", label: "Residencial", description: "até 140%" },
-  { value: "corporativo", label: "Corporativo", description: "até 110%" },
-  { value: "maximo", label: "Capacidade Máxima"},
-]
+interface SimultOption {
+  nome: string
+  valor: number
+}
 
 export function ModeSelector({ value, onChange }: ModeSelectorProps) {
+  const [options, setOptions] = useState<SimultOption[]>([])
+  const [selected, setSelected] = useState<string>(value)
+
+  useEffect(() => {
+    let active = true
+    async function load() {
+      const { data, error } = await supabase
+        .from('simultaneidade')
+        .select('nome, valor')
+        .order('nome', { ascending: true })
+
+      if (!active) return
+      if (error) {
+        console.error('Erro ao buscar simultaneidade:', error)
+        setOptions([
+          { nome: 'Corporativo', valor: 1.1 },
+          { nome: 'Residencial', valor: 1.4 },
+        ])
+        return
+      }
+
+      const list = (data || [])
+        .filter((r: any) => typeof r?.nome === 'string' && typeof r?.valor === 'number')
+        .map((r: any) => ({ nome: r.nome as string, valor: r.valor as number }))
+      setOptions(list)
+    }
+    load()
+    return () => { active = false }
+  }, [])
+
+  const residDefault = useMemo(() => {
+    const resid = options.find(o => o.nome.toLowerCase() === 'residencial')
+    return resid ? resid.valor.toString() : (options[0]?.valor?.toString() ?? '')
+  }, [options])
+
+  useEffect(() => {
+    if (!options.length) return
+
+    let next = value
+    const isNumeric = !Number.isNaN(parseFloat(value)) && value !== 'maximo'
+
+    if (value === 'residencial') {
+      next = residDefault
+    } else if (value === 'corporativo') {
+      const corp = options.find(o => o.nome.toLowerCase() === 'corporativo')
+      next = corp ? corp.valor.toString() : (isNumeric ? value : residDefault)
+    } else if (!isNumeric && value !== 'maximo') {
+      next = residDefault
+    }
+
+    setSelected(next)
+
+    if (next && next !== value) {
+      onChange(next)
+    }
+  }, [value, options, residDefault, onChange])
+
+  const handleChange = (val: string) => {
+    setSelected(val)
+    onChange(val)
+  }
+
   return (
     <HVACCard title="Modo de Simultaneidade" variant="warm">
-      <div className="space-y-3">
-        {modes.map((mode) => (
-          <label
-            key={mode.value}
-            className={cn(
-              "flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-all",
-              "hover:bg-primary-warm/5 hover:border-primary-warm/30",
-              value === mode.value
-                ? "bg-primary-warm/10 border-primary-warm/50 text-primary-warm"
-                : "bg-background/30 border-border/50 text-foreground"
-            )}
-          >
-            <div className="flex items-center space-x-3">
-              <input
-                type="radio"
-                name="mode"
-                value={mode.value}
-                checked={value === mode.value}
-                onChange={(e) => onChange(e.target.value)}
-                className="sr-only"
-              />
-              <div className={cn(
-                "w-4 h-4 rounded-full border-2 flex items-center justify-center",
-                value === mode.value
-                  ? "border-primary-warm bg-primary-warm"
-                  : "border-border"
-              )}>
-                {value === mode.value && (
-                  <div className="w-2 h-2 rounded-full bg-background" />
-                )}
-              </div>
-              <div>
-                <div className="font-medium">{mode.label}</div>
-                <div className="text-xs text-muted-foreground">{mode.description}</div>
-              </div>
-            </div>
-          </label>
-        ))}
-      </div>
+      <Select value={selected} onValueChange={handleChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Selecione o modo" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((opt) => {
+            const hidePercent = /capacidade|máxima|maxim/i.test(opt.nome)
+            return (
+              <SelectItem key={opt.nome} value={opt.valor.toString()}>
+                {hidePercent ? opt.nome : `${opt.nome} (${Math.round(opt.valor * 100)}%)`}
+              </SelectItem>
+            )
+          })}
+          <SelectItem value="maximo"><span className="sr-only">Capacidade Máxima</span></SelectItem>
+        </SelectContent>
+      </Select>
     </HVACCard>
   )
 }

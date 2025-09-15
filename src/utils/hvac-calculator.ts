@@ -15,6 +15,9 @@ const soma = (arr: number[]): number => arr.reduce((t, n) => t + n, 0)
 
 export function capEfetiva(modelo: EvaporatorModel, modo: string): number {
   const { capNominal, capMax } = modelo
+  if (modo === 'maximo') return capMax
+  const factor = parseFloat(modo)
+  if (!Number.isNaN(factor)) return Math.min(capNominal * factor, capMax)
   if (modo === 'residencial') return Math.min(capNominal * 1.4, capMax)
   if (modo === 'corporativo') return Math.min(capNominal * 1.1, capMax)
   return capMax
