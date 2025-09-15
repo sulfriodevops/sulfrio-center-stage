@@ -49,7 +49,7 @@ export function ModeSelector({ value, onChange }: ModeSelectorProps) {
               </div>
               <div>
                 <div className="font-medium">{mode.label}</div>
-                <div className="text-xs text-muted-foreground">({mode.description})</div>
+                <div className="text-xs text-muted-foreground">{mode.description}</div>
               </div>
             </div>
           </label>
