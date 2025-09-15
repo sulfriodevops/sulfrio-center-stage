@@ -83,11 +83,14 @@ export function ModeSelector({ value, onChange }: ModeSelectorProps) {
           <SelectValue placeholder="Selecione o modo" />
         </SelectTrigger>
         <SelectContent>
-          {options.map((opt) => (
-            <SelectItem key={opt.nome} value={opt.valor.toString()}>
-              {`${opt.nome} (${Math.round(opt.valor * 100)}%)`}
-            </SelectItem>
-          ))}
+          {options.map((opt) => {
+            const hidePercent = /capacidade|máxima|maxim/i.test(opt.nome)
+            return (
+              <SelectItem key={opt.nome} value={opt.valor.toString()}>
+                {hidePercent ? opt.nome : `${opt.nome} (${Math.round(opt.valor * 100)}%)`}
+              </SelectItem>
+            )
+          })}
           <SelectItem value="maximo"><span className="sr-only">Capacidade Máxima</span></SelectItem>
         </SelectContent>
       </Select>
