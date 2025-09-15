@@ -1,46 +1,69 @@
 import { Label } from "@/components/ui/label"
+import { useEffect, useState } from "react"
 import { HVACCard } from "@/components/ui/hvac-card"
-import { cn } from "@/lib/utils"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { supabase } from "@/integrations/supabase/client"
 
 interface BrandSelectorProps {
   value: string
   onChange: (value: string) => void
 }
 
-const brands = [
-  { value: "todas", label: "Todas as marcas" },
-  { value: "lg", label: "LG" },
-  { value: "daikin", label: "Daikin" },
-  { value: "samsung", label: "Samsung" },
-]
-
 export function BrandSelector({ value, onChange }: BrandSelectorProps) {
+  const [options, setOptions] = useState<{ label: string; value: string }[]>([])
+  const [selected, setSelected] = useState<string>(value)
+
+  useEffect(() => {
+    let active = true
+    async function load() {
+      const { data, error } = await supabase
+        .from('multi_produtos')
+        .select('fabricante')
+
+      if (!active) return
+      if (error) {
+        console.error('Erro ao buscar fabricantes:', error)
+        setOptions([
+          { label: 'Todas as marcas', value: 'todas' },
+        ])
+        return
+      }
+
+      const fabricantes = Array.from(new Set((data || [])
+        .map((r: any) => (r.fabricante || '').toString().trim())
+        .filter((f: string) => f.length > 0)
+      ))
+
+      fabricantes.sort((a: string, b: string) => a.localeCompare(b, 'pt-BR', { sensitivity: 'base' }))
+
+      const opts = [{ label: 'Todas as marcas', value: 'todas' }, ...fabricantes.map((f: string) => ({ label: f, value: f.toLowerCase() }))]
+      setOptions(opts)
+    }
+    load()
+    return () => { active = false }
+  }, [])
+
+  useEffect(() => {
+    setSelected(value)
+  }, [value])
+
+  const handleChange = (val: string) => {
+    setSelected(val)
+    onChange(val)
+  }
+
   return (
     <HVACCard title="Marca do Equipamento" variant="cool">
-      <div className="grid grid-cols-2 gap-2">
-        {brands.map((brand) => (
-          <label
-            key={brand.value}
-            className={cn(
-              "flex items-center justify-center p-3 rounded-lg border cursor-pointer transition-all text-sm font-medium",
-              "hover:bg-primary-cool/5 hover:border-primary-cool/30",
-              value === brand.value
-                ? "bg-primary-cool/10 border-primary-cool/50 text-primary-cool"
-                : "bg-background/30 border-border/50 text-foreground"
-            )}
-          >
-            <input
-              type="radio"
-              name="brand"
-              value={brand.value}
-              checked={value === brand.value}
-              onChange={(e) => onChange(e.target.value)}
-              className="sr-only"
-            />
-            {brand.label}
-          </label>
-        ))}
-      </div>
+      <Select value={selected} onValueChange={handleChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Todas as marcas" />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map(opt => (
+            <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </HVACCard>
   )
 }
