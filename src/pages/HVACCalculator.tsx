@@ -21,8 +21,10 @@ export default function HVACCalculator() {
     setLoading(true)
     
     try {
+      await ensureMODELOSFromDB()
+
       const entradaOriginal = parseEntrada(evaporators)
-      
+
       if (entradaOriginal.length === 0) {
         setResults([])
         setDetails("Informe ao menos uma evaporadora (7, 9, 12, 18, 24).")
