@@ -179,6 +179,19 @@ export function VRFCondensadoraCalculator() {
                 </Button>
               ))}
             </div>
+            {/* Alerta para 145% inválido em Vertical */}
+            {(() => {
+              const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+              const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+              if (!invalid145Vertical) return null;
+              return (
+                <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                    Limite Residencial (145%) permitido apenas para Condensadoras Horizontais
+                  </p>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Tipo de Condensadora e Modo */}
@@ -279,15 +292,31 @@ export function VRFCondensadoraCalculator() {
             
             {results && evaporators.length > 0 ? (
               <div className="space-y-3 text-sm">
-                {/* Warning for Daikin with 145% */}
-                {selectedBrand === "daikin" && params.simultaneidade === "residencial" && (
+                {/* Alerta para 145% inválido em Vertical */}
+                {(() => {
+                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+                  const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+                  return invalid145Vertical;
+                })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                     <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
-                      Atenção: na Daikin o limite é 130%. "Limite Residencial (145%)" só é permitido pela Samsung. Os cálculos abaixo consideram 130%.
+                      Atenção: você selecionou 145% com condensadora Vertical. Essa combinação é inválida.
                     </p>
                   </div>
                 )}
-                
+
+                {/* Warning for Daikin quando simultaneidade > 130% */}
+                {(() => {
+                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+                  return selectedBrand === 'daikin' && simulRaw > 1.30;
+                })() && (
+                  <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                    <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
+                      Na Daikin o limite máximo é 130%. "Limite Residencial (145%)" só é permitido pela Samsung. Os cálculos abaixo consideram 130%.
+                    </p>
+                  </div>
+                )}
+
                 {results[selectedBrand].condensadoraIdeal && (
                   <div className="p-3 bg-muted rounded-lg">
                     <p className="font-medium">Condensadora ideal: {results[selectedBrand].condensadoraIdeal.nome}{results[selectedBrand].condensadoraIdeal.volt ? ` (${results[selectedBrand].condensadoraIdeal.volt}v)` : ''}</p>
@@ -350,9 +379,21 @@ export function VRFCondensadoraCalculator() {
               <div>
                 <p><strong>Marca:</strong> {results[selectedBrand].marca}</p>
                 <p><strong>Simultaneidade (selecionada):</strong> {params.simultaneidade === 'corporativo' ? '110%' : params.simultaneidade === 'padrao' ? '130%' : '145%'}
-                  {selectedBrand === "daikin" && params.simultaneidade === "residencial" && (
-                    <span className="text-amber-600 dark:text-amber-400 text-xs ml-2">Capado p/ 130%</span>
-                  )}
+                  {(() => {
+                    const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+                    const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+                    return invalid145Vertical ? (
+                      <span className="ml-2 inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-800 dark:text-red-200">
+                        INVÁLIDA p/ Vertical
+                      </span>
+                    ) : null;
+                  })()}
+                  {(() => {
+                    const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
+                    return selectedBrand === 'daikin' && simulRaw > 1.30 ? (
+                      <span className="text-amber-600 dark:text-amber-400 text-xs ml-2">Capado p/ 130%</span>
+                    ) : null;
+                  })()}
                 </p>
                 <p><strong>Capacidade mínima requerida (após simult.):</strong> {results[selectedBrand].capacidadeMinima.toLocaleString()} {selectedBrand === "samsung" ? "BTU/h" : "unidades Daikin"}</p>
               </div>
