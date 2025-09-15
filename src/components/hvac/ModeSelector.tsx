@@ -88,7 +88,7 @@ export function ModeSelector({ value, onChange }: ModeSelectorProps) {
               {`${opt.nome} (${Math.round(opt.valor * 100)}%)`}
             </SelectItem>
           ))}
-          <SelectItem value="maximo">Capacidade Máxima</SelectItem>
+          <SelectItem value="maximo"><span className="sr-only">Capacidade Máxima</span></SelectItem>
         </SelectContent>
       </Select>
     </HVACCard>
