@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 
 interface ModeSelectorProps {
   value: string
-  onChange: value: string => void
+  onChange: (value: string) => void
 }
 
 const modes = [
