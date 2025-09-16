@@ -37,6 +37,46 @@ export function VRFCondensadoraCalculator() {
     nominal: '7'
   });
 
+  type SimultOption = { id: number; nome: string; valor: number };
+  const [simultOptions, setSimultOptions] = useState<SimultOption[]>([]);
+  const [form, setForm] = useState<{ simultaneidade: SimultOption | null; simultaneidadeValor: number }>({ simultaneidade: null, simultaneidadeValor: 110 });
+  const [simultLoading, setSimultLoading] = useState(false);
+  const [simultError, setSimultError] = useState<string | null>(null);
+
+  function applyDefaultSimult(opts: SimultOption[]) {
+    if (!opts?.length) return;
+    const corporativos = opts.filter(o => typeof o.nome === 'string' && o.nome.toLowerCase().startsWith('corporativo'));
+    const def = (corporativos.length ? corporativos.reduce((a, b) => (a.valor >= b.valor ? a : b)) : opts[0]);
+    setForm({ simultaneidade: def, simultaneidadeValor: def.valor });
+  }
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      setSimultLoading(true);
+      const { data, error } = await supabase
+        .from('simultaneidade_vrf')
+        .select('id, nome, valor')
+        .order('valor', { ascending: true })
+        .order('nome', { ascending: true });
+      if (!active) return;
+      if (error) {
+        console.error('Erro ao buscar simultaneidade_vrf:', error);
+        setSimultError('Não foi possível carregar as simultaneidades. Tente novamente.');
+        setSimultOptions([]);
+        setSimultLoading(false);
+        return;
+      }
+      const opts: SimultOption[] = (data || []).map((r: any) => ({ id: r.id as number, nome: String(r.nome), valor: Number(r.valor) }));
+      setSimultOptions(opts);
+      setSimultError(null);
+      applyDefaultSimult(opts);
+      setSimultLoading(false);
+    }
+    load();
+    return () => { active = false };
+  }, []);
+
   // Estado para lista de evaporadoras adicionadas
   const [evaporators, setEvaporators] = useState<Array<{
     type: string;
