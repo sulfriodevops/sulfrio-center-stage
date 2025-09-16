@@ -324,15 +324,24 @@ export function VRFCondensadoraCalculator() {
           <div className="space-y-4">
             <h3 className="font-semibold text-sm">Resultado</h3>
             <div className="flex gap-2 mb-4">
-              <Button 
-                variant={selectedBrand === "samsung" ? "default" : "outline"} 
+              <Button
+                variant={selectedBrand === "samsung" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedBrand("samsung")}
               >
                 Samsung
               </Button>
-              <Button 
-                variant={selectedBrand === "daikin" ? "default" : "outline"} 
+
+              {selectedBrand === 'daikin' && getSimultPercent() === 145 && (
+                <div className="flex items-center">
+                  <div className="p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md mr-2">
+                    <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">Atenção: na Daikin o limite é 130%. Cálculo feito com 130%.</p>
+                  </div>
+                </div>
+              )}
+
+              <Button
+                variant={selectedBrand === "daikin" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedBrand("daikin")}
               >
