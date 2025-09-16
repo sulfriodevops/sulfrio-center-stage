@@ -338,8 +338,7 @@ export function VRFCondensadoraCalculator() {
               <div className="space-y-3 text-sm">
                 {/* Alerta para 145% inválido em Vertical */}
                 {(() => {
-                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                  const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+                  const invalid145Vertical = form.simultaneidadeValor === 145 && params.tipoCondensadora === 'vertical';
                   return invalid145Vertical;
                 })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -351,8 +350,7 @@ export function VRFCondensadoraCalculator() {
 
                 {/* Warning for Daikin quando simultaneidade > 130% */}
                 {(() => {
-                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                  return selectedBrand === 'daikin' && simulRaw > 1.30;
+                  return selectedBrand === 'daikin' && form.simultaneidadeValor > 130;
                 })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                     <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
