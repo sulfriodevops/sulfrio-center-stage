@@ -168,10 +168,10 @@ export function VRFCondensadoraCalculator() {
     applyDefaultSimult(simultOptions);
   };
 
-  // Recalcula automaticamente quando evaporators ou params de simultaneidade/orientação mudam
+  // Recalcula automaticamente quando evaporators ou simultaneidade/orientação mudam
   useEffect(() => {
     recalculate();
-  }, [evaporators, params.simultaneidade, params.tipoCondensadora]);
+  }, [evaporators, form.simultaneidadeValor, params.tipoCondensadora]);
 
   // Recalcula evaporadores quando muda de marca
   useEffect(() => {
