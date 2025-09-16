@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StatusChip } from '@/components/ui/status-chip';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Thermometer, Settings } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { calcularCondensadoraVRF } from '@/utils/vrf-calculator';
 import { evaporadoras } from '@/utils/evaporadoras';
 
@@ -36,6 +37,80 @@ export function VRFCondensadoraCalculator() {
     nominal: '7'
   });
 
+  type SimultOption = { id: number; nome: string; valor: number };
+  const [simultOptions, setSimultOptions] = useState<SimultOption[]>([]);
+  const [form, setForm] = useState<{ simultaneidade: SimultOption | null; simultaneidadeValor: number }>({ simultaneidade: null, simultaneidadeValor: 110 });
+  const [simultLoading, setSimultLoading] = useState(false);
+  const [simultError, setSimultError] = useState<string | null>(null);
+
+  function applyDefaultSimult(opts: SimultOption[]) {
+    if (!opts?.length) return;
+    const corporativos = opts.filter(o => typeof o.nome === 'string' && o.nome.toLowerCase().startsWith('corporativo'));
+    const def = (corporativos.length ? corporativos.reduce((a, b) => (a.valor >= b.valor ? a : b)) : opts[0]);
+    setForm({ simultaneidade: def, simultaneidadeValor: def.valor });
+  }
+
+  const getSimultPercent = () => {
+    const v = form.simultaneidadeValor;
+    if (v == null) return 110;
+    return v > 10 ? Math.round(v) : Math.round(v * 100);
+  };
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      setSimultLoading(true);
+      const { data, error } = await supabase
+        .from('simultaneidade_vrf')
+        .select('id, nome, valor')
+        .order('valor', { ascending: true })
+        .order('nome', { ascending: true });
+      if (!active) return;
+      if (error || !data) {
+        console.error('Erro ao buscar simultaneidade_vrf:', JSON.stringify(error || data));
+        // Tenta fallback para tabela legacy 'simultaneidade'
+        try {
+          const { data: data2, error: error2 } = await supabase
+            .from('simultaneidade')
+            .select('id, nome, valor')
+            .order('valor', { ascending: true })
+            .order('nome', { ascending: true });
+          if (!active) return;
+          if (!error2 && data2 && data2.length) {
+            const opts2: SimultOption[] = (data2 || []).map((r: any, idx: number) => ({ id: (r.id ?? idx) as number, nome: String(r.nome), valor: Number(r.valor) }));
+            setSimultOptions(opts2);
+            setSimultError(null);
+            applyDefaultSimult(opts2);
+            setSimultLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error('Erro no fallback simultaneidade:', JSON.stringify(e));
+        }
+
+        // fallback estático
+        setSimultError('Não foi possível carregar as simultaneidades. Tente novamente.');
+        setSimultOptions([
+          { id: -1, nome: 'Corporativo', valor: 110 },
+          { id: -2, nome: 'Residencial', valor: 145 }
+        ]);
+        applyDefaultSimult([
+          { id: -1, nome: 'Corporativo', valor: 110 },
+          { id: -2, nome: 'Residencial', valor: 145 }
+        ]);
+        setSimultLoading(false);
+        return;
+      }
+      const opts: SimultOption[] = (data || []).map((r: any) => ({ id: r.id as number, nome: String(r.nome), valor: Number(r.valor) }));
+      setSimultOptions(opts);
+      setSimultError(null);
+      applyDefaultSimult(opts);
+      setSimultLoading(false);
+    }
+    load();
+    return () => { active = false };
+  }, []);
+
   // Estado para lista de evaporadoras adicionadas
   const [evaporators, setEvaporators] = useState<Array<{
     type: string;
@@ -49,42 +124,36 @@ export function VRFCondensadoraCalculator() {
   const [viewMode, setViewMode] = useState<"unidades" | "agrupado">("agrupado");
 
   const recalculate = () => {
-    const simultaneidadeValues = {
-      corporativo: 110,
-      padrao: 130,
-      residencial: 145
-    };
-
     // Soma todas as evaporadoras (realBTU * qtd)
     const totalCapacity = evaporators.reduce((acc, ev) => acc + (ev.realBTU * ev.qtd), 0);
-    
+
     if (totalCapacity === 0) {
       setResults(null);
       return;
     }
-    
+
     const entrada = [totalCapacity];
-    const simultaneidadeRaw = simultaneidadeValues[params.simultaneidade as keyof typeof simultaneidadeValues];
-    
+    const simultaneidadeRaw = form.simultaneidadeValor || 110;
+
     // Para Samsung, usa a simultaneidade selecionada
     const simultaneidadeSamsung = simultaneidadeRaw;
-    
-    // Para Daikin, limita a 130% se for 145%
+
+    // Para Daikin, limita a 130% quando selecionado acima de 130%
     const simultaneidadeDaikin = simultaneidadeRaw > 130 ? 130 : simultaneidadeRaw;
-    
+
     // Calcula para ambas as marcas com suas respectivas simultaneidades
     const samsungResult = calcularCondensadoraVRF(entrada, simultaneidadeSamsung, "samsung", params.tipoCondensadora as any);
     const daikinResult = calcularCondensadoraVRF(entrada, simultaneidadeDaikin, "daikin", params.tipoCondensadora as any);
 
     setResults({
-      samsung: { 
-        ...samsungResult, 
+      samsung: {
+        ...samsungResult,
         orientacao: params.tipoCondensadora,
         simultaneidadeUsada: simultaneidadeSamsung,
         simultaneidadeSelecionada: simultaneidadeRaw
       },
-      daikin: { 
-        ...daikinResult, 
+      daikin: {
+        ...daikinResult,
         orientacao: params.tipoCondensadora,
         simultaneidadeUsada: simultaneidadeDaikin,
         simultaneidadeSelecionada: simultaneidadeRaw
@@ -130,12 +199,13 @@ export function VRFCondensadoraCalculator() {
     setEvaporators([]);
     setResults(null);
     setParams({ simultaneidade: 'corporativo', tipoCondensadora: 'vertical', evaporadora: 'hi-wall', quantidade: '1', nominal: '7' });
+    applyDefaultSimult(simultOptions);
   };
 
-  // Recalcula automaticamente quando evaporators ou params de simultaneidade/orientação mudam
+  // Recalcula automaticamente quando evaporators ou simultaneidade/orientação mudam
   useEffect(() => {
     recalculate();
-  }, [evaporators, params.simultaneidade, params.tipoCondensadora]);
+  }, [evaporators, form.simultaneidadeValor, params.tipoCondensadora]);
 
   // Recalcula evaporadores quando muda de marca
   useEffect(() => {
@@ -163,26 +233,34 @@ export function VRFCondensadoraCalculator() {
           <div className="space-y-4">
             <h3 className="font-semibold text-sm">Simultaneidade</h3>
             <div className="space-y-2">
-              {[
-                { value: 'corporativo', label: 'Corporativo (110%)', selected: params.simultaneidade === 'corporativo' },
-                { value: 'padrao', label: 'Limite Padrão (130%)', selected: params.simultaneidade === 'padrao' },
-                { value: 'residencial', label: 'Limite Residencial (145%)', selected: params.simultaneidade === 'residencial' }
-              ].map((option) => (
-                <Button
-                  key={option.value}
-                  variant={option.selected ? "default" : "outline"}
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => setParams(prev => ({ ...prev, simultaneidade: option.value }))}
-                >
-                  {option.label}
-                </Button>
-              ))}
+              <Select
+                value={form.simultaneidade ? String(form.simultaneidade.id) : ''}
+                onValueChange={(value) => {
+                  const opt = simultOptions.find(o => String(o.id) === value) || null;
+                  if (opt) {
+                    setForm({ simultaneidade: opt, simultaneidadeValor: opt.valor });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={simultLoading ? 'Carregando...' : 'Selecione'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {simultOptions.map((opt) => (
+                    <SelectItem key={opt.id} value={String(opt.id)}>{opt.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.simultaneidade && (
+                <p className="text-xs text-muted-foreground">Fator: {form.simultaneidade.nome} (×{form.simultaneidadeValor})</p>
+              )}
+              {simultError && (
+                <p className="text-xs text-red-600 dark:text-red-400">{simultError}</p>
+              )}
             </div>
             {/* Alerta para 145% inválido em Vertical */}
             {(() => {
-              const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-              const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+              const invalid145Vertical = getSimultPercent() === 145 && params.tipoCondensadora === 'vertical';
               if (!invalid145Vertical) return null;
               return (
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -273,29 +351,30 @@ export function VRFCondensadoraCalculator() {
             {/* Resultado */}
           <div className="space-y-4">
             <h3 className="font-semibold text-sm">Resultado</h3>
-            <div className="flex gap-2 mb-4">
-              <Button 
-                variant={selectedBrand === "samsung" ? "default" : "outline"} 
+            <div className="flex items-center gap-2 mb-4">
+              <Button
+                variant={selectedBrand === "samsung" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedBrand("samsung")}
               >
                 Samsung
               </Button>
-              <Button 
-                variant={selectedBrand === "daikin" ? "default" : "outline"} 
+
+              <Button
+                variant={selectedBrand === "daikin" ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedBrand("daikin")}
               >
                 Daikin
               </Button>
+
             </div>
             
             {results && evaporators.length > 0 ? (
               <div className="space-y-3 text-sm">
                 {/* Alerta para 145% inválido em Vertical */}
                 {(() => {
-                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                  const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+                  const invalid145Vertical = getSimultPercent() === 145 && params.tipoCondensadora === 'vertical';
                   return invalid145Vertical;
                 })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -307,8 +386,7 @@ export function VRFCondensadoraCalculator() {
 
                 {/* Warning for Daikin quando simultaneidade > 130% */}
                 {(() => {
-                  const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                  return selectedBrand === 'daikin' && simulRaw > 1.30;
+                  return selectedBrand === 'daikin' && getSimultPercent() > 130;
                 })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                     <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
@@ -378,10 +456,9 @@ export function VRFCondensadoraCalculator() {
             <div className="grid grid-cols-2 gap-4 text-sm mb-4">
               <div>
                 <p><strong>Marca:</strong> {results[selectedBrand].marca}</p>
-                <p><strong>Simultaneidade (selecionada):</strong> {params.simultaneidade === 'corporativo' ? '110%' : params.simultaneidade === 'padrao' ? '130%' : '145%'}
+                <p><strong>Simultaneidade (selecionada):</strong> {form.simultaneidadeValor}%
                   {(() => {
-                    const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                    const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+                    const invalid145Vertical = getSimultPercent() === 145 && params.tipoCondensadora === 'vertical';
                     return invalid145Vertical ? (
                       <span className="ml-2 inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-800 dark:text-red-200">
                         INVÁLIDA p/ Vertical
@@ -389,8 +466,7 @@ export function VRFCondensadoraCalculator() {
                     ) : null;
                   })()}
                   {(() => {
-                    const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                    return selectedBrand === 'daikin' && simulRaw > 1.30 ? (
+                    return selectedBrand === 'daikin' && form.simultaneidadeValor > 130 ? (
                       <span className="text-amber-600 dark:text-amber-400 text-xs ml-2">Capado p/ 130%</span>
                     ) : null;
                   })()}
