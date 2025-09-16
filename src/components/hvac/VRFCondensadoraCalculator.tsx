@@ -420,10 +420,9 @@ export function VRFCondensadoraCalculator() {
             <div className="grid grid-cols-2 gap-4 text-sm mb-4">
               <div>
                 <p><strong>Marca:</strong> {results[selectedBrand].marca}</p>
-                <p><strong>Simultaneidade (selecionada):</strong> {params.simultaneidade === 'corporativo' ? '110%' : params.simultaneidade === 'padrao' ? '130%' : '145%'}
+                <p><strong>Simultaneidade (selecionada):</strong> {form.simultaneidadeValor}%
                   {(() => {
-                    const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                    const invalid145Vertical = Math.abs(simulRaw - 1.45) < 1e-6 && params.tipoCondensadora === 'vertical';
+                    const invalid145Vertical = form.simultaneidadeValor === 145 && params.tipoCondensadora === 'vertical';
                     return invalid145Vertical ? (
                       <span className="ml-2 inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-800 dark:text-red-200">
                         INVÁLIDA p/ Vertical
@@ -431,8 +430,7 @@ export function VRFCondensadoraCalculator() {
                     ) : null;
                   })()}
                   {(() => {
-                    const simulRaw = params.simultaneidade === 'corporativo' ? 1.10 : params.simultaneidade === 'padrao' ? 1.30 : 1.45;
-                    return selectedBrand === 'daikin' && simulRaw > 1.30 ? (
+                    return selectedBrand === 'daikin' && form.simultaneidadeValor > 130 ? (
                       <span className="text-amber-600 dark:text-amber-400 text-xs ml-2">Capado p/ 130%</span>
                     ) : null;
                   })()}
