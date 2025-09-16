@@ -165,6 +165,7 @@ export function VRFCondensadoraCalculator() {
     setEvaporators([]);
     setResults(null);
     setParams({ simultaneidade: 'corporativo', tipoCondensadora: 'vertical', evaporadora: 'hi-wall', quantidade: '1', nominal: '7' });
+    applyDefaultSimult(simultOptions);
   };
 
   // Recalcula automaticamente quando evaporators ou params de simultaneidade/orientação mudam
