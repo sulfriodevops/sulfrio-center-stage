@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { StatusChip } from '@/components/ui/status-chip';
 import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Thermometer, Settings } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { calcularCondensadoraVRF } from '@/utils/vrf-calculator';
 import { evaporadoras } from '@/utils/evaporadoras';
 
