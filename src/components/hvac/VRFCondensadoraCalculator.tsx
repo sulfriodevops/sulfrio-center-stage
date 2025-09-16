@@ -66,10 +66,38 @@ export function VRFCondensadoraCalculator() {
         .order('valor', { ascending: true })
         .order('nome', { ascending: true });
       if (!active) return;
-      if (error) {
-        console.error('Erro ao buscar simultaneidade_vrf:', error);
+      if (error || !data) {
+        console.error('Erro ao buscar simultaneidade_vrf:', JSON.stringify(error || data));
+        // Tenta fallback para tabela legacy 'simultaneidade'
+        try {
+          const { data: data2, error: error2 } = await supabase
+            .from('simultaneidade')
+            .select('id, nome, valor')
+            .order('valor', { ascending: true })
+            .order('nome', { ascending: true });
+          if (!active) return;
+          if (!error2 && data2 && data2.length) {
+            const opts2: SimultOption[] = (data2 || []).map((r: any, idx: number) => ({ id: (r.id ?? idx) as number, nome: String(r.nome), valor: Number(r.valor) }));
+            setSimultOptions(opts2);
+            setSimultError(null);
+            applyDefaultSimult(opts2);
+            setSimultLoading(false);
+            return;
+          }
+        } catch (e) {
+          console.error('Erro no fallback simultaneidade:', JSON.stringify(e));
+        }
+
+        // fallback estático
         setSimultError('Não foi possível carregar as simultaneidades. Tente novamente.');
-        setSimultOptions([]);
+        setSimultOptions([
+          { id: -1, nome: 'Corporativo', valor: 110 },
+          { id: -2, nome: 'Residencial', valor: 145 }
+        ]);
+        applyDefaultSimult([
+          { id: -1, nome: 'Corporativo', valor: 110 },
+          { id: -2, nome: 'Residencial', valor: 145 }
+        ]);
         setSimultLoading(false);
         return;
       }
