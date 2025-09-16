@@ -323,7 +323,7 @@ export function VRFCondensadoraCalculator() {
             {/* Resultado */}
           <div className="space-y-4">
             <h3 className="font-semibold text-sm">Resultado</h3>
-            <div className="flex gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-4">
               <Button
                 variant={selectedBrand === "samsung" ? "default" : "outline"}
                 size="sm"
@@ -332,20 +332,19 @@ export function VRFCondensadoraCalculator() {
                 Samsung
               </Button>
 
-              <div className="flex flex-col items-start">
-                {selectedBrand === 'daikin' && getSimultPercent() === 145 && (
-                  <div className="mb-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
-                    <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">Atenção: na Daikin o limite é 130%. Cálculo feito com 130%.</p>
-                  </div>
-                )}
-                <Button
-                  variant={selectedBrand === "daikin" ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedBrand("daikin")}
-                >
-                  Daikin
-                </Button>
-              </div>
+              <Button
+                variant={selectedBrand === "daikin" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedBrand("daikin")}
+              >
+                Daikin
+              </Button>
+
+              {selectedBrand === 'daikin' && getSimultPercent() === 145 && (
+                <div className="ml-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md">
+                  <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">Atenção: na Daikin o limite é 130%. Cálculo feito com 130%.</p>
+                </div>
+              )}
             </div>
             
             {results && evaporators.length > 0 ? (
