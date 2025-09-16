@@ -199,21 +199,30 @@ export function VRFCondensadoraCalculator() {
           <div className="space-y-4">
             <h3 className="font-semibold text-sm">Simultaneidade</h3>
             <div className="space-y-2">
-              {[
-                { value: 'corporativo', label: 'Corporativo (110%)', selected: params.simultaneidade === 'corporativo' },
-                { value: 'padrao', label: 'Limite Padrão (130%)', selected: params.simultaneidade === 'padrao' },
-                { value: 'residencial', label: 'Limite Residencial (145%)', selected: params.simultaneidade === 'residencial' }
-              ].map((option) => (
-                <Button
-                  key={option.value}
-                  variant={option.selected ? "default" : "outline"}
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => setParams(prev => ({ ...prev, simultaneidade: option.value }))}
-                >
-                  {option.label}
-                </Button>
-              ))}
+              <Select
+                value={form.simultaneidade ? String(form.simultaneidade.id) : ''}
+                onValueChange={(value) => {
+                  const opt = simultOptions.find(o => String(o.id) === value) || null;
+                  if (opt) {
+                    setForm({ simultaneidade: opt, simultaneidadeValor: opt.valor });
+                  }
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={simultLoading ? 'Carregando...' : 'Selecione'} />
+                </SelectTrigger>
+                <SelectContent>
+                  {simultOptions.map((opt) => (
+                    <SelectItem key={opt.id} value={String(opt.id)}>{opt.nome}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {form.simultaneidade && (
+                <p className="text-xs text-muted-foreground">Fator: {form.simultaneidade.nome} (×{form.simultaneidadeValor})</p>
+              )}
+              {simultError && (
+                <p className="text-xs text-red-600 dark:text-red-400">{simultError}</p>
+              )}
             </div>
             {/* Alerta para 145% inválido em Vertical */}
             {(() => {
