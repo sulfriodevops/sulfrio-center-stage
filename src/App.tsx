@@ -8,7 +8,8 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import Header from "@/components/layout/Header";
 import Index from "./pages/Index";
 import HVACCalculator from "./pages/HVACCalculator";
-import VRFCalculator from "./pages/VRFCalculator";
+// Lazy load VRF to avoid HMR/import timing issues
+const VRFCalculatorPage = React.lazy(() => import("./pages/VRFCalculator"));
 import DiariasCalculator from "./pages/DiariasCalculator";
 import Settings from "./pages/Settings";
 import Login from "./pages/Login";
@@ -74,7 +75,9 @@ const AppContent = () => {
           path="/vrf" 
           element={
             <ProtectedRoute>
-              <VRFCalculator />
+              <React.Suspense fallback={<div className="p-6">Carregando...</div>}>
+                <VRFCalculatorPage />
+              </React.Suspense>
             </ProtectedRoute>
           } 
         />
