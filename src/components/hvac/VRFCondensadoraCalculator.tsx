@@ -90,42 +90,36 @@ export function VRFCondensadoraCalculator() {
   const [viewMode, setViewMode] = useState<"unidades" | "agrupado">("agrupado");
 
   const recalculate = () => {
-    const simultaneidadeValues = {
-      corporativo: 110,
-      padrao: 130,
-      residencial: 145
-    };
-
     // Soma todas as evaporadoras (realBTU * qtd)
     const totalCapacity = evaporators.reduce((acc, ev) => acc + (ev.realBTU * ev.qtd), 0);
-    
+
     if (totalCapacity === 0) {
       setResults(null);
       return;
     }
-    
+
     const entrada = [totalCapacity];
-    const simultaneidadeRaw = simultaneidadeValues[params.simultaneidade as keyof typeof simultaneidadeValues];
-    
+    const simultaneidadeRaw = form.simultaneidadeValor || 110;
+
     // Para Samsung, usa a simultaneidade selecionada
     const simultaneidadeSamsung = simultaneidadeRaw;
-    
-    // Para Daikin, limita a 130% se for 145%
+
+    // Para Daikin, limita a 130% quando selecionado acima de 130%
     const simultaneidadeDaikin = simultaneidadeRaw > 130 ? 130 : simultaneidadeRaw;
-    
+
     // Calcula para ambas as marcas com suas respectivas simultaneidades
     const samsungResult = calcularCondensadoraVRF(entrada, simultaneidadeSamsung, "samsung", params.tipoCondensadora as any);
     const daikinResult = calcularCondensadoraVRF(entrada, simultaneidadeDaikin, "daikin", params.tipoCondensadora as any);
 
     setResults({
-      samsung: { 
-        ...samsungResult, 
+      samsung: {
+        ...samsungResult,
         orientacao: params.tipoCondensadora,
         simultaneidadeUsada: simultaneidadeSamsung,
         simultaneidadeSelecionada: simultaneidadeRaw
       },
-      daikin: { 
-        ...daikinResult, 
+      daikin: {
+        ...daikinResult,
         orientacao: params.tipoCondensadora,
         simultaneidadeUsada: simultaneidadeDaikin,
         simultaneidadeSelecionada: simultaneidadeRaw
