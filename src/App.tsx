@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 import HVACCalculator from "./pages/HVACCalculator";
 import VRFCalculator from "./pages/VRFCalculator";
 import DiariasCalculator from "./pages/DiariasCalculator";
-import UserManagement from "./pages/UserManagement";
+import Settings from "./pages/Settings";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -90,7 +90,7 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <AdminRoute>
-                <UserManagement />
+                <Settings />
               </AdminRoute>
             </ProtectedRoute>
           } 

@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      multi_produtos: {
+        Row: {
+          cap_max: number
+          cap_nominal: number
+          combinacoes: Json
+          fabricante: string
+          id: string
+          max_evaps: number | null
+          modelo: string
+          nome: string
+          tipo: string
+        }
+        Insert: {
+          cap_max: number
+          cap_nominal: number
+          combinacoes: Json
+          fabricante: string
+          id?: string
+          max_evaps?: number | null
+          modelo: string
+          nome: string
+          tipo: string
+        }
+        Update: {
+          cap_max?: number
+          cap_nominal?: number
+          combinacoes?: Json
+          fabricante?: string
+          id?: string
+          max_evaps?: number | null
+          modelo?: string
+          nome?: string
+          tipo?: string
+        }
+        Relationships: []
+      }
+      simultaneidade: {
+        Row: {
+          id: number
+          nome: string
+          valor: number
+        }
+        Insert: {
+          id?: number
+          nome: string
+          valor: number
+        }
+        Update: {
+          id?: number
+          nome?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      simultaneidade_vrf: {
+        Row: {
+          id: number
+          nome: string
+          valor: number
+        }
+        Insert: {
+          id?: number
+          nome: string
+          valor: number
+        }
+        Update: {
+          id?: number
+          nome?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       user_sessions: {
         Row: {
           created_at: string
@@ -82,6 +154,63 @@ export type Database = {
           senha?: string
           updated_at?: string
           usuario?: string
+        }
+        Relationships: []
+      }
+      vrf_cond_produtos: {
+        Row: {
+          hp: number
+          id: number
+          marca: string
+          orientacao: string
+          real: number
+          tipo: string | null
+          voltagem: string | null
+        }
+        Insert: {
+          hp: number
+          id?: number
+          marca: string
+          orientacao: string
+          real: number
+          tipo?: string | null
+          voltagem?: string | null
+        }
+        Update: {
+          hp?: number
+          id?: number
+          marca?: string
+          orientacao?: string
+          real?: number
+          tipo?: string | null
+          voltagem?: string | null
+        }
+        Relationships: []
+      }
+      vrf_evap_produtos: {
+        Row: {
+          id: number
+          marca: string
+          modelo: string | null
+          nominal: number | null
+          real: number
+          tipo: string
+        }
+        Insert: {
+          id?: number
+          marca: string
+          modelo?: string | null
+          nominal?: number | null
+          real: number
+          tipo: string
+        }
+        Update: {
+          id?: number
+          marca?: string
+          modelo?: string | null
+          nominal?: number | null
+          real?: number
+          tipo?: string
         }
         Relationships: []
       }
