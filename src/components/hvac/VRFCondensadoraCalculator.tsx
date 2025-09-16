@@ -50,6 +50,12 @@ export function VRFCondensadoraCalculator() {
     setForm({ simultaneidade: def, simultaneidadeValor: def.valor });
   }
 
+  const getSimultPercent = () => {
+    const v = form.simultaneidadeValor;
+    if (v == null) return 110;
+    return v > 10 ? Math.round(v) : Math.round(v * 100);
+  };
+
   useEffect(() => {
     let active = true;
     async function load() {
@@ -226,7 +232,7 @@ export function VRFCondensadoraCalculator() {
             </div>
             {/* Alerta para 145% inválido em Vertical */}
             {(() => {
-              const invalid145Vertical = form.simultaneidadeValor === 145 && params.tipoCondensadora === 'vertical';
+              const invalid145Vertical = getSimultPercent() === 145 && params.tipoCondensadora === 'vertical';
               if (!invalid145Vertical) return null;
               return (
                 <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -338,7 +344,7 @@ export function VRFCondensadoraCalculator() {
               <div className="space-y-3 text-sm">
                 {/* Alerta para 145% inválido em Vertical */}
                 {(() => {
-                  const invalid145Vertical = form.simultaneidadeValor === 145 && params.tipoCondensadora === 'vertical';
+                  const invalid145Vertical = getSimultPercent() === 145 && params.tipoCondensadora === 'vertical';
                   return invalid145Vertical;
                 })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
@@ -350,7 +356,7 @@ export function VRFCondensadoraCalculator() {
 
                 {/* Warning for Daikin quando simultaneidade > 130% */}
                 {(() => {
-                  return selectedBrand === 'daikin' && form.simultaneidadeValor > 130;
+                  return selectedBrand === 'daikin' && getSimultPercent() > 130;
                 })() && (
                   <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                     <p className="text-amber-800 dark:text-amber-200 text-sm font-medium">
@@ -422,7 +428,7 @@ export function VRFCondensadoraCalculator() {
                 <p><strong>Marca:</strong> {results[selectedBrand].marca}</p>
                 <p><strong>Simultaneidade (selecionada):</strong> {form.simultaneidadeValor}%
                   {(() => {
-                    const invalid145Vertical = form.simultaneidadeValor === 145 && params.tipoCondensadora === 'vertical';
+                    const invalid145Vertical = getSimultPercent() === 145 && params.tipoCondensadora === 'vertical';
                     return invalid145Vertical ? (
                       <span className="ml-2 inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2 py-0.5 text-xs font-medium text-red-800 dark:text-red-200">
                         INVÁLIDA p/ Vertical
