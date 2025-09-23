@@ -279,20 +279,20 @@ const VrfEvapCard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <Label>Marca</Label>
-            <Select value={brandFilter} onValueChange={setBrandFilter}>
+            <Select value={brandFilter || '__ALL__'} onValueChange={(v) => setBrandFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="__ALL__">Todas</SelectItem>
                 {brands.map(b => (<SelectItem key={b} value={b}>{b}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Tipo</Label>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter || '__ALL__'} onValueChange={(v) => setTypeFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="__ALL__">Todos</SelectItem>
                 {types.map(t => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
               </SelectContent>
             </Select>
@@ -589,20 +589,20 @@ const VrfCondCard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <Label>Marca</Label>
-            <Select value={brandFilter} onValueChange={setBrandFilter}>
+            <Select value={brandFilter || '__ALL__'} onValueChange={(v) => setBrandFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="__ALL__">Todas</SelectItem>
                 {brands.map(b => (<SelectItem key={b} value={b}>{b}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Orientação</Label>
-            <Select value={oriFilter} onValueChange={setOriFilter}>
+            <Select value={oriFilter || '__ALL__'} onValueChange={(v) => setOriFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas</SelectItem>
+                <SelectItem value="__ALL__">Todas</SelectItem>
                 {oris.map(o => (<SelectItem key={o} value={o}>{o}</SelectItem>))}
               </SelectContent>
             </Select>
@@ -905,20 +905,20 @@ const MultiSplitTab: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <Label>Fabricante</Label>
-            <Select value={manFilter} onValueChange={setManFilter}>
+            <Select value={manFilter || '__ALL__'} onValueChange={(v) => setManFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="__ALL__">Todos</SelectItem>
                 {mans.map(m => (<SelectItem key={m} value={m}>{m}</SelectItem>))}
               </SelectContent>
             </Select>
           </div>
           <div>
             <Label>Tipo</Label>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={typeFilter || '__ALL__'} onValueChange={(v) => setTypeFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="__ALL__">Todos</SelectItem>
                 {types.map(t => (<SelectItem key={t} value={t}>{t}</SelectItem>))}
               </SelectContent>
             </Select>
