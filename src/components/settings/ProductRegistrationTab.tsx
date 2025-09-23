@@ -129,7 +129,7 @@ const VrfEvapCard: React.FC = () => {
       }
       if (!showInactive) {
         // Try to filter by active if the column exists at DB level. If not, query will just error and we ignore silently by fetching without this filter
-        const withActive = await from.clone().limit(1).select('active');
+        const withActive = await supabase.from('vrf_evap_produtos' as any).select('active').limit(1);
         if (!(withActive as any).error) {
           (from as any).eq('active', true);
         }
@@ -445,7 +445,7 @@ const VrfCondCard: React.FC = () => {
       if (oriFilter) (from as any).ilike('orientacao', `%${oriFilter}%`);
       if (debouncedSearch) (from as any).or(`marca.ilike.%${debouncedSearch}%,modelo.ilike.%${debouncedSearch}%,orientacao.ilike.%${debouncedSearch}%,voltagem.ilike.%${debouncedSearch}%`);
       if (!showInactive) {
-        const probe = await from.clone().limit(1).select('active');
+        const probe = await supabase.from('vrf_cond_produtos' as any).select('active').limit(1);
         if (!(probe as any).error) (from as any).eq('active', true);
       }
       (from as any).order('marca', { ascending: true }).order('hp', { ascending: true });
@@ -757,7 +757,7 @@ const MultiSplitTab: React.FC = () => {
       if (typeFilter) (from as any).ilike('tipo', `%${typeFilter}%`);
       if (debouncedSearch) (from as any).or(`fabricante.ilike.%${debouncedSearch}%,tipo.ilike.%${debouncedSearch}%,nome.ilike.%${debouncedSearch}%,modelo.ilike.%${debouncedSearch}%`);
       if (!showInactive) {
-        const probe = await from.clone().limit(1).select('active');
+        const probe = await supabase.from('multi_produtos' as any).select('active').limit(1);
         if (!(probe as any).error) (from as any).eq('active', true);
       }
       (from as any).order('fabricante', { ascending: true }).order('nome', { ascending: true });
