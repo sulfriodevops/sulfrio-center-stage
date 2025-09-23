@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UsersTab from '@/components/settings/UsersTab';
 import SimultaneidadeTab from '@/components/settings/SimultaneidadeTab';
+import ProductRegistrationTab from '@/components/settings/ProductRegistrationTab';
 
 const Settings = () => {
   return (
@@ -17,17 +18,22 @@ const Settings = () => {
       </div>
       
       <Tabs defaultValue="usuarios" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="usuarios">Usuários</TabsTrigger>
           <TabsTrigger value="simultaneidade">Cadastro de Simultaneidade</TabsTrigger>
+          <TabsTrigger value="produtos">Cadastro de Produtos</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="usuarios" className="mt-6">
           <UsersTab />
         </TabsContent>
-        
+
         <TabsContent value="simultaneidade" className="mt-6">
           <SimultaneidadeTab />
+        </TabsContent>
+
+        <TabsContent value="produtos" className="mt-6">
+          <ProductRegistrationTab />
         </TabsContent>
       </Tabs>
     </div>
