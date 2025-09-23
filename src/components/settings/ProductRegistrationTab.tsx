@@ -279,7 +279,7 @@ const VrfEvapCard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <Label>Marca</Label>
-            <Select value={brandFilter || '__ALL__'} onValueChange={(v) => setBrandFilter(v === '__ALL__' ? '' : v)}>
+            <Select value={brandFilter} onValueChange={(v) => setBrandFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__ALL__">Todas</SelectItem>
@@ -289,7 +289,7 @@ const VrfEvapCard: React.FC = () => {
           </div>
           <div>
             <Label>Tipo</Label>
-            <Select value={typeFilter || '__ALL__'} onValueChange={(v) => setTypeFilter(v === '__ALL__' ? '' : v)}>
+            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__ALL__">Todos</SelectItem>
@@ -589,7 +589,7 @@ const VrfCondCard: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <Label>Marca</Label>
-            <Select value={brandFilter || '__ALL__'} onValueChange={(v) => setBrandFilter(v === '__ALL__' ? '' : v)}>
+            <Select value={brandFilter} onValueChange={(v) => setBrandFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__ALL__">Todas</SelectItem>
@@ -599,7 +599,7 @@ const VrfCondCard: React.FC = () => {
           </div>
           <div>
             <Label>Orientação</Label>
-            <Select value={oriFilter || '__ALL__'} onValueChange={(v) => setOriFilter(v === '__ALL__' ? '' : v)}>
+            <Select value={oriFilter} onValueChange={(v) => setOriFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todas" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__ALL__">Todas</SelectItem>
@@ -905,7 +905,7 @@ const MultiSplitTab: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <Label>Fabricante</Label>
-            <Select value={manFilter || '__ALL__'} onValueChange={(v) => setManFilter(v === '__ALL__' ? '' : v)}>
+            <Select value={manFilter} onValueChange={(v) => setManFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__ALL__">Todos</SelectItem>
@@ -915,7 +915,7 @@ const MultiSplitTab: React.FC = () => {
           </div>
           <div>
             <Label>Tipo</Label>
-            <Select value={typeFilter || '__ALL__'} onValueChange={(v) => setTypeFilter(v === '__ALL__' ? '' : v)}>
+            <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v === '__ALL__' ? '' : v)}>
               <SelectTrigger><SelectValue placeholder="Todos" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="__ALL__">Todos</SelectItem>
