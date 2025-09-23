@@ -18,17 +18,22 @@ const Settings = () => {
       </div>
       
       <Tabs defaultValue="usuarios" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="usuarios">Usuários</TabsTrigger>
           <TabsTrigger value="simultaneidade">Cadastro de Simultaneidade</TabsTrigger>
+          <TabsTrigger value="produtos">Cadastro de Produtos</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="usuarios" className="mt-6">
           <UsersTab />
         </TabsContent>
-        
+
         <TabsContent value="simultaneidade" className="mt-6">
           <SimultaneidadeTab />
+        </TabsContent>
+
+        <TabsContent value="produtos" className="mt-6">
+          <ProductRegistrationTab />
         </TabsContent>
       </Tabs>
     </div>
