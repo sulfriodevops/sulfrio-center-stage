@@ -134,7 +134,8 @@ const VrfEvapCard: React.FC = () => {
           (from as any).eq('active', true);
         }
       }
-      (from as any).order('marca', { ascending: true }).order('modelo', { ascending: true });
+      (from as any).order(sort.col as string, { ascending: sort.dir === 'asc' });
+      if (sort.col !== 'marca') (from as any).order('marca', { ascending: true });
 
       // Pagination (manual since count not requested)
       const start = (page - 1) * pageSize;
@@ -311,9 +312,13 @@ const VrfEvapCard: React.FC = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Marca</TableHead>
+                <TableHead className="cursor-pointer" onClick={() => setSort(s => ({ col: 'marca', dir: s.col === 'marca' && s.dir === 'asc' ? 'desc' : 'asc' }))}>
+                  Marca {sort.col === 'marca' ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
+                </TableHead>
                 <TableHead>Tipo</TableHead>
-                <TableHead>Modelo</TableHead>
+                <TableHead className="cursor-pointer" onClick={() => setSort(s => ({ col: 'modelo', dir: s.col === 'modelo' && s.dir === 'asc' ? 'desc' : 'asc' }))}>
+                  Modelo {sort.col === 'modelo' ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
+                </TableHead>
                 <TableHead>Nominal</TableHead>
                 <TableHead>Real</TableHead>
                 <TableHead>Status</TableHead>
