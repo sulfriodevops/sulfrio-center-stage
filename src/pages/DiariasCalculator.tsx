@@ -172,7 +172,7 @@ export default function DiariasCalculator() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 p-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2">Calculadora de Diárias de Projetos</h1>
-        <p className="text-center text-muted-foreground mb-8">A Glória é de Deus</p>
+        <p className="text-center text-muted-foreground mb-8"></p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Informações do Projeto */}
