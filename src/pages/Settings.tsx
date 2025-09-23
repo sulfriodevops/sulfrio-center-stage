@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UsersTab from '@/components/settings/UsersTab';
 import SimultaneidadeTab from '@/components/settings/SimultaneidadeTab';
+import ProductRegistrationTab from '@/components/settings/ProductRegistrationTab';
 
 const Settings = () => {
   return (
