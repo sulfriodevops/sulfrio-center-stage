@@ -184,7 +184,7 @@ const VrfEvapCard: React.FC = () => {
 
   const validate = () => {
     if (!form.marca.trim() || !form.tipo.trim() || !form.modelo.trim()) {
-      toast({ title: 'Campos obrigatórios', description: 'Marca, Tipo e Modelo são obrigatórios', variant: 'destructive' });
+      toast({ title: 'Campos obrigatórios', description: 'Marca, Tipo e Modelo são obrigat��rios', variant: 'destructive' });
       return false;
     }
     const nominal = Number(form.nominal);
@@ -1067,12 +1067,24 @@ const ProductRegistrationTab: React.FC = () => {
             <TabsTrigger value="vrf">VRF</TabsTrigger>
             <TabsTrigger value="multi">Multi Split</TabsTrigger>
           </TabsList>
+
           <TabsContent value="vrf" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <VrfEvapCard />
-              <VrfCondCard />
-            </div>
+            <Tabs defaultValue="evap">
+              <TabsList>
+                <TabsTrigger value="evap">Evaporadoras</TabsTrigger>
+                <TabsTrigger value="cond">Condensadoras</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="evap" className="mt-4">
+                <VrfEvapCard />
+              </TabsContent>
+
+              <TabsContent value="cond" className="mt-4">
+                <VrfCondCard />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
+
           <TabsContent value="multi">
             <MultiSplitTab />
           </TabsContent>
