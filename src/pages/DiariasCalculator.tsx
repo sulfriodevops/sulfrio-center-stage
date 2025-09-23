@@ -43,6 +43,25 @@ export default function DiariasCalculator() {
     tipoEvap: "Dutado"
   });
 
+  const [projectInfo, setProjectInfo] = useState({
+    arquiteto: "",
+    telefone: "",
+    endereco: "",
+    processo: ""
+  });
+
+  const formatTelefone = (value: string) => {
+    const d = value.replace(/\D/g, "").slice(0, 11);
+    if (d.length === 0) return "";
+    const dd = d;
+    const p1 = dd.slice(0, 2);
+    const rest = dd.slice(2);
+    if (dd.length <= 2) return `(${p1}`;
+    if (dd.length <= 6) return `(${p1}) ${rest}`;
+    if (dd.length <= 10) return `(${p1}) ${rest.slice(0, 4)}-${rest.slice(4)}`;
+    return `(${p1}) ${rest.slice(0, 5)}-${rest.slice(5)}`;
+  };
+
   const fmt = (n: number) => Number(n).toLocaleString("pt-BR");
 
   const addAmbiente = () => {
@@ -153,9 +172,48 @@ export default function DiariasCalculator() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-background/90 p-6">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-2">Calculadora de Diárias de Projetos</h1>
-        <p className="text-center text-muted-foreground mb-8">A Glória é de Deus</p>
+        <p className="text-center text-muted-foreground mb-8"></p>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Informações do Projeto */}
+          <Card className="p-6 lg:col-span-2">
+            <Label className="mb-4 block">Informações do Projeto</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label className="mb-2 block">Arquiteto responsável</Label>
+                <Input
+                  placeholder="Nome do arquiteto responsável"
+                  value={projectInfo.arquiteto}
+                  onChange={(e) => setProjectInfo(prev => ({ ...prev, arquiteto: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label className="mb-2 block">Telefone</Label>
+                <Input
+                  placeholder="(00) 00000-0000"
+                  inputMode="tel"
+                  value={projectInfo.telefone}
+                  onChange={(e) => setProjectInfo(prev => ({ ...prev, telefone: formatTelefone(e.target.value) }))}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label className="mb-2 block">Endereço da obra</Label>
+                <Input
+                  placeholder="Endereço completo da obra"
+                  value={projectInfo.endereco}
+                  onChange={(e) => setProjectInfo(prev => ({ ...prev, endereco: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label className="mb-2 block">Número do processo</Label>
+                <Input
+                  placeholder="Número do processo"
+                  value={projectInfo.processo}
+                  onChange={(e) => setProjectInfo(prev => ({ ...prev, processo: e.target.value }))}
+                />
+              </div>
+            </div>
+          </Card>
           {/* Configurações */}
           <Card className="p-6">
             <div className="grid grid-cols-2 gap-6">
